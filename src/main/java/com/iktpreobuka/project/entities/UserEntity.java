@@ -38,12 +38,16 @@ public class UserEntity {
 	@JsonIgnore
 	private List<OfferEntity> offers = new ArrayList<OfferEntity>();
 
+	@OneToMany(mappedBy = "user", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<BillEntity> bills = new ArrayList<>();
+
 	public UserEntity() {
 		super();
 	}
 
 	public UserEntity(Integer id, String firstName, String lastName, String username, String password, String email,
-			EUserRole userRole, List<OfferEntity> offers) {
+			EUserRole userRole, List<OfferEntity> offers, List<BillEntity> bills) {
 		super();
 		this.id = id;
 		this.firstName = firstName;
@@ -53,6 +57,7 @@ public class UserEntity {
 		this.email = email;
 		this.userRole = userRole;
 		this.offers = offers;
+		this.bills = bills;
 	}
 
 	public Integer getId() {
@@ -117,6 +122,14 @@ public class UserEntity {
 
 	public void setOffers(List<OfferEntity> offers) {
 		this.offers = offers;
+	}
+
+	public List<BillEntity> getBills() {
+		return bills;
+	}
+
+	public void setBills(List<BillEntity> bills) {
+		this.bills = bills;
 	}
 
 }

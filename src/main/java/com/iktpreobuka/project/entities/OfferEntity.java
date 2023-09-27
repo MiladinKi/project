@@ -1,8 +1,12 @@
 package com.iktpreobuka.project.entities;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.sym.Name;
 
 import jakarta.persistence.CascadeType;
@@ -14,8 +18,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 
 @Entity
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class OfferEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -40,24 +46,26 @@ public class OfferEntity {
 	private Integer boughtOffers;
 	@Column(nullable = false)
 	private EOfferStatus offerStatus;
-	
+
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "category")
 	private CategoryEntity category;
-	
+
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "user")
 	private UserEntity user;
-	
+
+	@OneToMany(mappedBy = "offer", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<BillEntity> bills = new ArrayList<>();
+
 	public OfferEntity() {
 		super();
 	}
 
-
-
 	public OfferEntity(Integer id, String offerName, String offerDescription, Date offerCreated, Date offerExpires,
 			Double regularPrice, Double actionPrice, String imagePath, Integer availableOffers, Integer boughtOffers,
-			EOfferStatus offerStatus, CategoryEntity category, UserEntity user) {
+			EOfferStatus offerStatus, CategoryEntity category, UserEntity user, List<BillEntity> bills) {
 		super();
 		this.id = id;
 		this.offerName = offerName;
@@ -72,9 +80,8 @@ public class OfferEntity {
 		this.offerStatus = offerStatus;
 		this.category = category;
 		this.user = user;
+		this.bills = bills;
 	}
-
-
 
 	public Integer getId() {
 		return id;
@@ -164,30 +171,28 @@ public class OfferEntity {
 		this.offerStatus = offerStatus;
 	}
 
-
-
 	public CategoryEntity getCategory() {
 		return category;
 	}
-
-
 
 	public void setCategory(CategoryEntity category) {
 		this.category = category;
 	}
 
-
-
 	public UserEntity getUser() {
 		return user;
 	}
 
-
-
 	public void setUser(UserEntity user) {
 		this.user = user;
 	}
-	
-	
+
+	public List<BillEntity> getBills() {
+		return bills;
+	}
+
+	public void setBills(List<BillEntity> bills) {
+		this.bills = bills;
+	}
 
 }
