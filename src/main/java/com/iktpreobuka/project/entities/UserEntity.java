@@ -1,12 +1,22 @@
 package com.iktpreobuka.project.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 @Entity
+@JsonIgnoreProperties({ "hibernateLazyInitalizer", "hendler" })
 public class UserEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,12 +34,16 @@ public class UserEntity {
 	@Column(nullable = false)
 	private EUserRole userRole;
 
+	@OneToMany(mappedBy = "user", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<OfferEntity> offers = new ArrayList<OfferEntity>();
+
 	public UserEntity() {
 		super();
 	}
 
 	public UserEntity(Integer id, String firstName, String lastName, String username, String password, String email,
-			EUserRole userRole) {
+			EUserRole userRole, List<OfferEntity> offers) {
 		super();
 		this.id = id;
 		this.firstName = firstName;
@@ -38,6 +52,7 @@ public class UserEntity {
 		this.password = password;
 		this.email = email;
 		this.userRole = userRole;
+		this.offers = offers;
 	}
 
 	public Integer getId() {
@@ -94,6 +109,14 @@ public class UserEntity {
 
 	public void setUserRole(EUserRole userRole) {
 		this.userRole = userRole;
+	}
+
+	public List<OfferEntity> getOffers() {
+		return offers;
+	}
+
+	public void setOffers(List<OfferEntity> offers) {
+		this.offers = offers;
 	}
 
 }
