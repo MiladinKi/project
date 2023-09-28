@@ -59,13 +59,18 @@ public class OfferEntity {
 	@JsonIgnore
 	private List<BillEntity> bills = new ArrayList<>();
 
+	@OneToMany(mappedBy = "offer", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<VoucherEntity> vouchers;
+
 	public OfferEntity() {
 		super();
 	}
 
 	public OfferEntity(Integer id, String offerName, String offerDescription, Date offerCreated, Date offerExpires,
 			Double regularPrice, Double actionPrice, String imagePath, Integer availableOffers, Integer boughtOffers,
-			EOfferStatus offerStatus, CategoryEntity category, UserEntity user, List<BillEntity> bills) {
+			EOfferStatus offerStatus, CategoryEntity category, UserEntity user, List<BillEntity> bills,
+			List<VoucherEntity> vouchers) {
 		super();
 		this.id = id;
 		this.offerName = offerName;
@@ -81,6 +86,7 @@ public class OfferEntity {
 		this.category = category;
 		this.user = user;
 		this.bills = bills;
+		this.vouchers = vouchers;
 	}
 
 	public Integer getId() {
@@ -193,6 +199,14 @@ public class OfferEntity {
 
 	public void setBills(List<BillEntity> bills) {
 		this.bills = bills;
+	}
+
+	public List<VoucherEntity> getVouchers() {
+		return vouchers;
+	}
+
+	public void setVouchers(List<VoucherEntity> vouchers) {
+		this.vouchers = vouchers;
 	}
 
 }

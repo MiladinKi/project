@@ -42,12 +42,16 @@ public class UserEntity {
 	@JsonIgnore
 	private List<BillEntity> bills = new ArrayList<>();
 
+	@OneToMany(mappedBy = "user", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<VoucherEntity> vouchers;
+
 	public UserEntity() {
 		super();
 	}
 
 	public UserEntity(Integer id, String firstName, String lastName, String username, String password, String email,
-			EUserRole userRole, List<OfferEntity> offers, List<BillEntity> bills) {
+			EUserRole userRole, List<OfferEntity> offers, List<BillEntity> bills, List<VoucherEntity> vouchers) {
 		super();
 		this.id = id;
 		this.firstName = firstName;
@@ -58,6 +62,7 @@ public class UserEntity {
 		this.userRole = userRole;
 		this.offers = offers;
 		this.bills = bills;
+		this.vouchers = vouchers;
 	}
 
 	public Integer getId() {
@@ -130,6 +135,14 @@ public class UserEntity {
 
 	public void setBills(List<BillEntity> bills) {
 		this.bills = bills;
+	}
+
+	public List<VoucherEntity> getVouchers() {
+		return vouchers;
+	}
+
+	public void setVouchers(List<VoucherEntity> vouchers) {
+		this.vouchers = vouchers;
 	}
 
 }
