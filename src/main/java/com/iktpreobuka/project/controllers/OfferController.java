@@ -1,20 +1,24 @@
 package com.iktpreobuka.project.controllers;
 
-import java.util.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.iktpreobuka.project.entities.CategoryEntity;
 import com.iktpreobuka.project.entities.EOfferStatus;
@@ -24,10 +28,14 @@ import com.iktpreobuka.project.entities.UserEntity;
 import com.iktpreobuka.project.repository.CategoryRepository;
 import com.iktpreobuka.project.repository.OfferRepository;
 import com.iktpreobuka.project.repository.UserRepository;
+import com.iktpreobuka.project.services.BillService;
+import com.iktpreobuka.project.services.OfferService;
 
 @RestController
 @RequestMapping(path = "/api/v1/offers")
 public class OfferController {
+	
+	private static String UPLOAD_DIRECTORY = "C:\\Temp\\";
 	List<OfferEntity> offers = new ArrayList<>();
 
 	@Autowired
@@ -38,6 +46,13 @@ public class OfferController {
 	
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private OfferService offerService;
+	
+	@Autowired
+	private BillService billService;
+	
 //	private List<OfferEntity> getDB() {
 
 //		if (offers.size() == 0) {
@@ -253,5 +268,46 @@ public class OfferController {
 		offerRepository.saveAll(priceOffers);
 		return priceOffers;
 	}
-
+	
+	@RequestMapping(method = RequestMethod.PUT, value = "/{offerId}/update-offers")
+	public OfferEntity updateBoughtOffers(@PathVariable Integer offerId, @RequestParam Integer boughtOffers) {
+		return offerService.updateAvailableBoughtOffer(offerId, boughtOffers);
+	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/uploadImage/{id}")
+	public OfferEntity uploadImage(@PathVariable Integer id, @RequestParam ("imageFile") MultipartFile imageFile) throws IOException {
+		OfferEntity offer = offerRepository.findById(id).get();
+		if(offer == null) {
+			return null;
+		}
+		try {
+			byte[] bytes = imageFile.getBytes();
+			Path path = Paths.get(UPLOAD_DIRECTORY + imageFile.getOriginalFilename());
+			Files.write(path, bytes);
+			
+			offer.setImagePath(path.toString());
+			offerRepository.save(offer);
+		}
+		catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+		return offer;
+	}
+	
+	@RequestMapping(method = RequestMethod.PUT, value = "/changeStatus/{id}")
+	public ResponseEntity<OfferEntity> changeOfferStatus(@PathVariable Integer id){
+		OfferEntity offer = offerRepository.findById(id).get();
+		if(offer == null) {
+			return null;
+		}
+		
+		offer.setOfferStatus(EOfferStatus.EXPIRED);
+		
+		if(offer.getOfferStatus().equals(EOfferStatus.EXPIRED)) {
+			billService.cancelBillsByOffer(offer);
+		}
+		offer = offerService.updateOffer(offer);
+		return ResponseEntity.ok(offer);
+	}
 }

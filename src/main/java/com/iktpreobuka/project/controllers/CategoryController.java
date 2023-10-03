@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.iktpreobuka.project.entities.CategoryEntity;
 import com.iktpreobuka.project.repository.CategoryRepository;
+import com.iktpreobuka.project.services.BillService;
+import com.iktpreobuka.project.services.CategoryService;
+import com.iktpreobuka.project.services.OfferService;
 
 @RestController
 @RequestMapping(path = "/api/v1/categories")
@@ -21,6 +26,15 @@ public class CategoryController {
 
 	@Autowired
 	private CategoryRepository categoryRepository;
+	
+	@Autowired
+	private BillService billService;
+	
+	@Autowired
+	private OfferService offerService;
+	
+	@Autowired
+	private CategoryService categoryService;
 
 //	private List<CategoryEntity> getDB() {
 //		if (categories.size() == 0) {
@@ -67,7 +81,7 @@ public class CategoryController {
 	}
 
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
-	public void deleteCategory(@PathVariable Integer id) {
+	public void deleteCategoryById(@PathVariable Integer id) {
 		categoryRepository.deleteById(id);
 
 	}
@@ -77,4 +91,17 @@ public class CategoryController {
 		CategoryEntity category = categoryRepository.findById(id).get();
 		return category;
 	}
-}
+	
+	@RequestMapping(method = RequestMethod.DELETE, value = "/{categoryId}")
+	public ResponseEntity<?> deleteCategory(@PathVariable Integer categoryId){
+		if(offerService.hasActiveOffersInCategory(categoryId)) {
+			return new ResponseEntity<>("Nije dozvoljeno brisanje kategorije sa aktivnim ponudama.", HttpStatus.BAD_REQUEST);
+		}
+		if(billService.hasActiveBillsInCategory(categoryId)) {
+			return new ResponseEntity<>("Nije dozvoljeno brisanje kategorije sa aktivnim racunima.", HttpStatus.BAD_REQUEST);
+		}
+		categoryService.deleteCategory(categoryId);
+		return new ResponseEntity<>("Kategorija je uspešno obrisana.", HttpStatus.OK);
+    }
+	}
+
