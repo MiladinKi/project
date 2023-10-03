@@ -17,6 +17,7 @@ import com.iktpreobuka.project.entities.VoucherEntity;
 import com.iktpreobuka.project.repository.OfferRepository;
 import com.iktpreobuka.project.repository.UserRepository;
 import com.iktpreobuka.project.repository.VoucherRepository;
+import com.iktpreobuka.project.services.EmailService;
 
 @RestController
 @RequestMapping(path = "/api/v1/vouchers")
@@ -30,6 +31,9 @@ public class VoucherController {
 	
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private EmailService emailService;
 	
 	@RequestMapping(method = RequestMethod.GET)
 	public Iterable<VoucherEntity> getAllVouchers(){
@@ -48,6 +52,7 @@ public class VoucherController {
 			newVoucher.setOffer(offer);
 			newVoucher.setUser(buyer);
 			voucherRepository.save(newVoucher);
+			emailService.sendVoucherEmail(buyer.getEmail(), newVoucher);
 			return newVoucher;
 		}
 		return null;
