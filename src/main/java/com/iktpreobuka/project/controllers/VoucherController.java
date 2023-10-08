@@ -10,13 +10,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.project.entities.EUserRole;
 import com.iktpreobuka.project.entities.OfferEntity;
 import com.iktpreobuka.project.entities.UserEntity;
 import com.iktpreobuka.project.entities.VoucherEntity;
+import com.iktpreobuka.project.entities.dtoes.VoucherDTO;
 import com.iktpreobuka.project.repository.OfferRepository;
 import com.iktpreobuka.project.repository.UserRepository;
 import com.iktpreobuka.project.repository.VoucherRepository;
+import com.iktpreobuka.project.security.Views;
 import com.iktpreobuka.project.services.EmailService;
 
 @RestController
@@ -35,20 +38,33 @@ public class VoucherController {
 	@Autowired
 	private EmailService emailService;
 	
-	@RequestMapping(method = RequestMethod.GET)
-	public Iterable<VoucherEntity> getAllVouchers(){
+	@RequestMapping(method = RequestMethod.GET, value = "/public")
+	@JsonView(Views.Public.class)
+	public Iterable<VoucherEntity> getAllVouchersPublic(){
+		return voucherRepository.findAll();
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/private")
+	@JsonView(Views.Private.class)
+	public Iterable<VoucherEntity> getAllVouchersPrivate(){
+		return voucherRepository.findAll();
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/admin")
+	@JsonView(Views.Admin.class)
+	public Iterable<VoucherEntity> getAllVouchersAdmin(){
 		return voucherRepository.findAll();
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/{offerId}/buyer/{buyerId}")
-	public VoucherEntity addVoucher(@RequestParam LocalDate expirationDate, @RequestParam Boolean isUsed,
+	public VoucherEntity addVoucher(@RequestBody VoucherDTO newVoucherDTO,
 			@PathVariable Integer offerId, @PathVariable Integer buyerId) {
 		VoucherEntity newVoucher = new VoucherEntity();
 		OfferEntity offer = offerRepository.findById(offerId).get();
 		UserEntity buyer = userRepository.findById(buyerId).get();
 		if(buyer.getUserRole() == EUserRole.ROLE_CUSTOMER) {
-			newVoucher.setExpirationDate(expirationDate);
-			newVoucher.setIsUsed(isUsed);
+			newVoucher.setExpirationDate(newVoucherDTO.getExpirationDate());
+			newVoucher.setIsUsed(false);
 			newVoucher.setOffer(offer);
 			newVoucher.setUser(buyer);
 			voucherRepository.save(newVoucher);
@@ -59,20 +75,20 @@ public class VoucherController {
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
-	public VoucherEntity changeVoucher(@RequestBody VoucherEntity updatedVoucher, 
+	public VoucherEntity changeVoucher(@RequestBody VoucherDTO updatedVoucherDTO, 
 			@PathVariable Integer id) {
 		VoucherEntity voucher = voucherRepository.findById(id).get();
-		if(updatedVoucher.getExpirationDate() != null) {
-			voucher.setExpirationDate(updatedVoucher.getExpirationDate());
+		if(updatedVoucherDTO.getExpirationDate() != null) {
+			voucher.setExpirationDate(updatedVoucherDTO.getExpirationDate());
 		}
-		if(updatedVoucher.getIsUsed() != null) {
-			voucher.setIsUsed(updatedVoucher.getIsUsed());
+		if(updatedVoucherDTO.getIsUsed() != null) {
+			voucher.setIsUsed(updatedVoucherDTO.getIsUsed());
 		}
-		if(updatedVoucher.getOffer() != null) {
-			voucher.setOffer(updatedVoucher.getOffer());
+		if(updatedVoucherDTO.getOffer() != null) {
+			voucher.setOffer(updatedVoucherDTO.getOffer());
 		}
-		if(updatedVoucher.getUser() != null) {
-			voucher.setUser(updatedVoucher.getUser());
+		if(updatedVoucherDTO.getUser() != null) {
+			voucher.setUser(updatedVoucherDTO.getUser());
 		}
 		voucherRepository.save(voucher);
 		return voucher;
