@@ -5,9 +5,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.sym.Name;
+import com.iktpreobuka.project.security.Views;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -19,48 +24,72 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class OfferEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
+	@JsonView(Views.Public.class)
 	private Integer id;
 	@Column(nullable = false)
+	@JsonView(Views.Public.class)
 	private String offerName;
 	@Column(nullable = false)
+	@Size(min = 5, max = 20, message = "Offer description must have between {min} and {max} " + "characters long.")
+	@JsonView(Views.Public.class)
 	private String offerDescription;
-	@Column(nullable = false)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+	@JsonView(Views.Public.class)
 	private Date offerCreated;
-	@Column(nullable = false)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+	@JsonView(Views.Public.class)
 	private Date offerExpires;
 	@Column(nullable = false)
+	@Min(value = 1, message = "Offer Created must be bigger then 1")
+	@JsonView(Views.Public.class)
 	private Double regularPrice;
+	@Min(value = 1, message = "Offer Created must be bigger then 1")
 	@Column(nullable = false)
+	@JsonView(Views.Public.class)
 	private Double actionPrice;
 	@Column(nullable = false)
+	@JsonView(Views.Public.class)
 	private String imagePath;
 	@Column(nullable = false)
+	@Min(value = 0, message = "Offer Created must be bigger then 0")
+	@JsonView(Views.Public.class)
 	private Integer availableOffers;
 	@Column(nullable = false)
+	@Min(value = 0, message = "Offer Created must be bigger then 0")
+	@JsonView(Views.Public.class)
 	private Integer boughtOffers;
-	@Column(nullable = false)
+	@JsonView(Views.Public.class)
 	private EOfferStatus offerStatus;
 
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "category")
+	@JsonView(Views.Public.class)
+	@JsonBackReference
 	private CategoryEntity category;
 
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "user")
+	@JsonView(Views.Public.class)
+	@JsonBackReference
 	private UserEntity user;
 
 	@OneToMany(mappedBy = "offer", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	@JsonIgnore
+	@JsonManagedReference
+	@JsonView(Views.Public.class)
 	private List<BillEntity> bills = new ArrayList<>();
 
 	@OneToMany(mappedBy = "offer", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	@JsonIgnore
+	@JsonManagedReference
+	@JsonView(Views.Public.class)
 	private List<VoucherEntity> vouchers;
 
 	public OfferEntity() {

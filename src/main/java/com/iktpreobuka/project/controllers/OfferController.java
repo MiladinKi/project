@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.project.entities.CategoryEntity;
 import com.iktpreobuka.project.entities.EOfferStatus;
 import com.iktpreobuka.project.entities.EUserRole;
@@ -28,6 +29,7 @@ import com.iktpreobuka.project.entities.UserEntity;
 import com.iktpreobuka.project.repository.CategoryRepository;
 import com.iktpreobuka.project.repository.OfferRepository;
 import com.iktpreobuka.project.repository.UserRepository;
+import com.iktpreobuka.project.security.Views;
 import com.iktpreobuka.project.services.BillService;
 import com.iktpreobuka.project.services.OfferService;
 
@@ -84,8 +86,21 @@ public class OfferController {
 //		return offers;
 //	}
 
-	@RequestMapping(method = RequestMethod.GET)
-	public List<OfferEntity> getAllOffers() {
+	@RequestMapping(method = RequestMethod.GET, value = "/public")
+	@JsonView(Views.Public.class)
+	public List<OfferEntity> getAllOffersPublic() {
+		return (List<OfferEntity>) offerRepository.findAll();
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/private")
+	@JsonView(Views.Private.class)
+	public List<OfferEntity> getAllOffersPrivate() {
+		return (List<OfferEntity>) offerRepository.findAll();
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/admin")
+	@JsonView(Views.Admin.class)
+	public List<OfferEntity> getAllOffersAdmin() {
 		return (List<OfferEntity>) offerRepository.findAll();
 	}
 

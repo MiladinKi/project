@@ -5,6 +5,9 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.iktpreobuka.project.security.Views;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -14,36 +17,50 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @JsonIgnoreProperties({ "hibernateLazyInitalizer", "hendler" })
 public class UserEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
+	@JsonView(Views.Public.class)
 	private Integer id;
 	@Column(nullable = false)
+	@JsonView(Views.Private.class)
 	private String firstName;
 	@Column(nullable = false)
+	@JsonView(Views.Private.class)
 	private String lastName;
 	@Column(nullable = false)
+	@Size(min = 5, max = 20, message = "Username must be between {min} and {max} characters long.")
+	@JsonView(Views.Public.class)
 	private String username;
 	@Column(nullable = false)
+	@Size(min = 5, message = "Lozinka mora sadržavati najmanje 5 karaktera.")
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-zA-Z]).*$", message = "Lozinka mora sadržavati brojeve i slova.")
+	@JsonIgnore
 	private String password;
 	@Column(nullable = false)
+	@JsonView(Views.Private.class)
 	private String email;
-	@Column(nullable = false)
+	@JsonView(Views.Admin.class)
 	private EUserRole userRole;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	@JsonIgnore
+	@JsonManagedReference
+	@JsonView(Views.Private.class)
 	private List<OfferEntity> offers = new ArrayList<OfferEntity>();
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	@JsonIgnore
+	@JsonManagedReference
+	@JsonView(Views.Private.class)
 	private List<BillEntity> bills = new ArrayList<>();
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	@JsonIgnore
+	@JsonManagedReference
+	@JsonView(Views.Admin.class)
 	private List<VoucherEntity> vouchers;
 
 	public UserEntity() {

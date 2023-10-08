@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.project.entities.CategoryEntity;
 import com.iktpreobuka.project.repository.CategoryRepository;
+import com.iktpreobuka.project.security.Views;
 import com.iktpreobuka.project.services.BillService;
 import com.iktpreobuka.project.services.CategoryService;
 import com.iktpreobuka.project.services.OfferService;
@@ -50,8 +52,21 @@ public class CategoryController {
 //		return categories;
 //	}
 
-	@RequestMapping(method = RequestMethod.GET)
-	public List<CategoryEntity> getAllCategories() {
+	@RequestMapping(method = RequestMethod.GET, value = "/public")
+	@JsonView(Views.Public.class)
+	public List<CategoryEntity> getAllCategoriesPublic() {
+		return (List<CategoryEntity>) categoryRepository.findAll();
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/admin")
+	@JsonView(Views.Admin.class)
+	public List<CategoryEntity> getAllCategoriesAdmin() {
+		return (List<CategoryEntity>) categoryRepository.findAll();
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/private")
+	@JsonView(Views.Private.class)
+	public List<CategoryEntity> getAllCategoriesPrivate() {
 		return (List<CategoryEntity>) categoryRepository.findAll();
 	}
 

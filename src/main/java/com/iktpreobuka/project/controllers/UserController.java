@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.iktpreobuka.project.entities.EUserRole;
 import com.iktpreobuka.project.entities.UserEntity;
 import com.iktpreobuka.project.repository.UserRepository;
+import com.iktpreobuka.project.security.Views;
 
 @RestController
 @RequestMapping(path = "/api/v1/users")
@@ -41,8 +43,21 @@ public class UserController {
 //		return users;
 //	}
 
-	@RequestMapping(method = RequestMethod.GET)
-	public List<UserEntity> getAllUsers() {
+	@RequestMapping(method = RequestMethod.GET, value = "/public")
+	@JsonView(Views.Public.class)
+	public List<UserEntity> getAllUsersPublic() {
+//		return getDB();
+		return (List<UserEntity>) userRepository.findAll();
+	}
+	@RequestMapping(method = RequestMethod.GET, value = "/private")
+	@JsonView(Views.Private.class)
+	public List<UserEntity> getAllUsersPrivate() {
+//		return getDB();
+		return (List<UserEntity>) userRepository.findAll();
+	}
+	@RequestMapping(method = RequestMethod.GET, value = "/admin")
+	@JsonView(Views.Admin.class)
+	public List<UserEntity> getAllUsersAdmin() {
 //		return getDB();
 		return (List<UserEntity>) userRepository.findAll();
 	}
